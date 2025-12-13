@@ -1,3 +1,4 @@
+import { Badge } from "@/components/ui/badge";
 import {
 	Card,
 	CardContent,
@@ -5,7 +6,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface Team {
 	abbrev: string;
@@ -35,7 +35,7 @@ export function MatchupCard({
 	status,
 }: MatchupCardProps) {
 	return (
-		<Card>
+		<Card className="w-full">
 			<CardHeader>
 				<div className="flex items-center justify-between">
 					<CardTitle className="text-lg">{venue}</CardTitle>

@@ -1,6 +1,7 @@
 import { MatchupCard } from "@/components/matchup-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchTodaySchedule } from "@/lib/nhl-api";
+import { fetchScheduleByDate } from "@/lib/nhl-api";
+import { notFound } from "next/navigation";
 
 interface Team {
 	abbrev: string;
@@ -32,8 +33,21 @@ interface ScheduleData {
 	games: Game[];
 }
 
-async function getSchedule(): Promise<ScheduleData> {
-	return fetchTodaySchedule();
+interface PageProps {
+	params: Promise<{
+		date: string;
+	}>;
+}
+
+function isValidDate(dateString: string): boolean {
+	// Validate YYYY-MM-DD format
+	const regex = /^\d{4}-\d{2}-\d{2}$/;
+	if (!regex.test(dateString)) {
+		return false;
+	}
+
+	const date = new Date(dateString);
+	return date instanceof Date && !isNaN(date.getTime());
 }
 
 function formatGameTime(startTimeUTC: string): string {
@@ -63,20 +77,39 @@ function getGameStateLabel(
 	return { label: gameState, variant: "default" };
 }
 
-export default async function TodaySchedulePage() {
-	const data = await getSchedule();
-	const today = new Date().toLocaleDateString("en-US", {
+function formatDisplayDate(dateString: string): string {
+	const date = new Date(dateString + "T00:00:00");
+	return date.toLocaleDateString("en-US", {
 		weekday: "long",
 		year: "numeric",
 		month: "long",
 		day: "numeric",
 	});
+}
+
+export default async function ScheduleDatePage({ params }: PageProps) {
+	const { date } = await params;
+
+	// Validate date format
+	if (!isValidDate(date)) {
+		notFound();
+	}
+
+	let data: ScheduleData;
+	try {
+		data = await fetchScheduleByDate(date);
+	} catch (error) {
+		console.error("Error fetching schedule:", error);
+		notFound();
+	}
+
+	const displayDate = formatDisplayDate(date);
 
 	return (
 		<div className="container mx-auto py-8 px-4">
 			<div className="mb-8">
-				<h1 className="text-4xl font-bold mb-2">Today&apos;s Games</h1>
-				<p className="text-muted-foreground">{today}</p>
+				<h1 className="text-4xl font-bold mb-2">Games for {displayDate}</h1>
+				<p className="text-muted-foreground">{date}</p>
 			</div>
 
 			{data.games && data.games.length > 0 ? (
@@ -101,7 +134,7 @@ export default async function TodaySchedulePage() {
 				<Card>
 					<CardContent className="py-12">
 						<p className="text-center text-muted-foreground">
-							No games scheduled for today
+							No games scheduled for this date
 						</p>
 					</CardContent>
 				</Card>
