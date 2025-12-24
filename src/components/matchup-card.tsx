@@ -39,38 +39,50 @@ export function MatchupCard({
 	status,
 }: MatchupCardProps) {
 	return (
-		<Card className="w-full">
-			<CardHeader>
-				<div className="flex items-center justify-between">
-					<Image
-						src={awayTeam.logo}
-						width={50}
-						height={50}
-						alt="{awayTeam.name.default} logo"
-					/>
-					<Image
-						src={homeTeam.logo}
-						width={50}
-						height={50}
-						alt="{homeTeam.name.default} logo"
-					/>
-					<Badge variant={status.variant}>{status.label}</Badge>
+		<Card className="w-full relative pt-0 pb-4">
+			<CardHeader className="p-0">
+				<div className="flex items-center justify-between w-full h-16 bg-accent overflow-hidden">
+					{/*<div className="w-full items-center">
+						<Image
+							src={awayTeam.logo}
+							width={150}
+							height={50}
+							alt="{awayTeam.name.default} logo"
+							className="object-fill"
+						/>
+					</div>
+					<div className="w-full">
+						<Image
+							src={homeTeam.logo}
+							width={150}
+							height={50}
+							alt="{homeTeam.name.default} logo"
+							className="object-cover"
+						/>
+					</div>*/}
+					<Badge className="absolute right-4 top-4" variant={status.variant}>
+						{status.label}
+					</Badge>
 				</div>
 			</CardHeader>
-			<CardContent>
-				<div className="space-y-4">
+			<CardContent className="pl-2 ">
+				<div className="space-y-3">
 					{/* Away Team */}
 					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
+						<div className="flex items-center gap-2">
 							<Image
 								src={awayTeam.logo}
-								width={50}
-								height={50}
+								width={60}
+								height={60}
 								alt="{awayTeam.name.default} logo"
+								className="object-none"
 							/>
-							<div className="font-semibold">{awayTeam.abbrev}</div>
-							<div className="text-sm text-muted-foreground">
+
+							<div className="font-semibold text-lg -ml-2">
 								{awayTeam.name.default}
+							</div>
+							<div className="text-sm text-muted-foreground">
+								{awayTeam.abbrev}
 							</div>
 						</div>
 						{awayTeam.score !== undefined && (
@@ -80,16 +92,18 @@ export function MatchupCard({
 
 					{/* Home Team */}
 					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
+						<div className="flex items-center gap-2">
 							<Image
 								src={homeTeam.logo}
-								width={50}
-								height={50}
+								width={60}
+								height={60}
 								alt="{homeTeam.name.default} logo"
 							/>
-							<div className="font-semibold">{homeTeam.abbrev}</div>
-							<div className="text-sm text-muted-foreground">
+							<div className="font-semibold text-lg -ml-2">
 								{homeTeam.name.default}
+							</div>
+							<div className="text-sm text-muted-foreground">
+								{homeTeam.abbrev}
 							</div>
 						</div>
 						{homeTeam.score !== undefined && (
@@ -98,7 +112,7 @@ export function MatchupCard({
 					</div>
 				</div>
 			</CardContent>
-			<CardFooter>
+			<CardFooter className="border-t-2 border-muted pt-3">
 				<div className="flex items-center justify-between w-full">
 					<CardTitle className="flex items-center text-xs gap-1">
 						<Icon
