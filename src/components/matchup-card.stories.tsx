@@ -1,6 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { MatchupCard } from "./matchup-card";
 
+// Helper to create a UTC time string for a given hour offset from now
+function getTimeUTC(hoursFromNow: number): string {
+	const date = new Date();
+	date.setHours(date.getHours() + hoursFromNow);
+	return date.toISOString();
+}
+
 const meta = {
 	title: "Components/MatchupCard",
 	component: MatchupCard,
@@ -34,9 +41,9 @@ const meta = {
 			control: "text",
 			description: "Venue name where the game is played",
 		},
-		gameTime: {
+		startTimeUTC: {
 			control: "text",
-			description: "Formatted game start time",
+			description: "Game start time in UTC ISO format",
 		},
 		status: {
 			control: "object",
@@ -49,7 +56,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Scheduled game
+// Scheduled game (in 2 hours)
 export const Scheduled: Story = {
 	args: {
 		awayTeam: {
@@ -67,7 +74,33 @@ export const Scheduled: Story = {
 			logo: "https://assets.nhle.com/logos/nhl/svg/STL_light.svg",
 		},
 		venue: "Enterprise Center",
-		gameTime: "7:00 PM CST",
+		startTimeUTC: getTimeUTC(2),
+		status: {
+			label: "Scheduled",
+			variant: "secondary",
+		},
+	},
+};
+
+// Scheduled game starting soon (in 15 minutes)
+export const StartingSoon: Story = {
+	args: {
+		awayTeam: {
+			abbrev: "NYR",
+			name: {
+				default: "Rangers",
+			},
+			logo: "https://assets.nhle.com/logos/nhl/svg/NYR_light.svg",
+		},
+		homeTeam: {
+			abbrev: "NJD",
+			name: {
+				default: "Devils",
+			},
+			logo: "https://assets.nhle.com/logos/nhl/svg/NJD_light.svg",
+		},
+		venue: "Prudential Center",
+		startTimeUTC: getTimeUTC(0.25),
 		status: {
 			label: "Scheduled",
 			variant: "secondary",
@@ -95,7 +128,7 @@ export const Live: Story = {
 			logo: "https://assets.nhle.com/logos/nhl/svg/UTA_light.svg",
 		},
 		venue: "Delta Center",
-		gameTime: "8:30 PM MST",
+		startTimeUTC: getTimeUTC(-1),
 		status: {
 			label: "Live",
 			variant: "destructive",
@@ -123,7 +156,7 @@ export const Final: Story = {
 			logo: "https://assets.nhle.com/logos/nhl/svg/TOR_light.svg",
 		},
 		venue: "Scotiabank Arena",
-		gameTime: "7:00 PM EST",
+		startTimeUTC: getTimeUTC(-3),
 		status: {
 			label: "Final",
 			variant: "outline",
@@ -151,7 +184,7 @@ export const Blowout: Story = {
 			logo: "https://assets.nhle.com/logos/nhl/svg/CBJ_light.svg",
 		},
 		venue: "Nationwide Arena",
-		gameTime: "7:00 PM EST",
+		startTimeUTC: getTimeUTC(-3),
 		status: {
 			label: "Final",
 			variant: "outline",
@@ -179,7 +212,7 @@ export const TieGame: Story = {
 			logo: "https://assets.nhle.com/logos/nhl/svg/CGY_light.svg",
 		},
 		venue: "Scotiabank Saddledome",
-		gameTime: "9:00 PM MST",
+		startTimeUTC: getTimeUTC(-1),
 		status: {
 			label: "Live",
 			variant: "destructive",

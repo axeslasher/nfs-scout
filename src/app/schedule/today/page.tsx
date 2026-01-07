@@ -1,6 +1,8 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { MatchupCard } from "@/components/matchup-card";
 import { Card, CardContent } from "@/components/ui/card";
-import { fetchTodaySchedule } from "@/lib/nhl-api";
 
 interface Team {
 	abbrev: string;
@@ -32,17 +34,12 @@ interface ScheduleData {
 	games: Game[];
 }
 
-async function getSchedule(): Promise<ScheduleData> {
-	return fetchTodaySchedule();
-}
-
-function formatGameTime(startTimeUTC: string): string {
-	const date = new Date(startTimeUTC);
-	return date.toLocaleTimeString("en-US", {
-		hour: "numeric",
-		minute: "2-digit",
-		timeZoneName: "short",
-	});
+/**
+ * Get today's date in the user's local timezone (YYYY-MM-DD format)
+ */
+function getLocalTodayDate(): string {
+	const now = new Date();
+	return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
 function getGameStateLabel(
@@ -63,27 +60,90 @@ function getGameStateLabel(
 	return { label: gameState, variant: "default" };
 }
 
-export default async function TodaySchedulePage() {
-	const data = await getSchedule();
-	const today = new Date().toLocaleDateString("en-US", {
-		weekday: "long",
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+export default function TodaySchedulePage() {
+	const [data, setData] = useState<ScheduleData | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+	const [todayDate, setTodayDate] = useState<string>("");
+
+	useEffect(() => {
+		const localDate = getLocalTodayDate();
+		setTodayDate(localDate);
+
+		async function fetchSchedule() {
+			try {
+				const res = await fetch(`/api/schedule/${localDate}`);
+				if (!res.ok) {
+					throw new Error("Failed to fetch schedule");
+				}
+				const scheduleData = await res.json();
+				setData(scheduleData);
+			} catch (err) {
+				setError(err instanceof Error ? err.message : "An error occurred");
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchSchedule();
+	}, []);
+
+	const displayDate = todayDate
+		? new Date(todayDate + "T00:00:00").toLocaleDateString("en-US", {
+				weekday: "long",
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+			})
+		: "";
+
+	if (loading) {
+		return (
+			<div className="container mx-auto py-8 px-4">
+				<div className="mb-8">
+					<h1 className="text-4xl font-bold mb-2">Today&apos;s Games</h1>
+					<p className="text-muted-foreground">Loading...</p>
+				</div>
+				<Card>
+					<CardContent className="py-12">
+						<p className="text-center text-muted-foreground">
+							Loading schedule...
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="container mx-auto py-8 px-4">
+				<div className="mb-8">
+					<h1 className="text-4xl font-bold mb-2">Today&apos;s Games</h1>
+					<p className="text-muted-foreground">{displayDate}</p>
+				</div>
+				<Card>
+					<CardContent className="py-12">
+						<p className="text-center text-muted-foreground">
+							Error loading schedule: {error}
+						</p>
+					</CardContent>
+				</Card>
+			</div>
+		);
+	}
 
 	return (
 		<div className="container mx-auto py-8 px-4">
 			<div className="mb-8">
 				<h1 className="text-4xl font-bold mb-2">Today&apos;s Games</h1>
-				<p className="text-muted-foreground">{today}</p>
+				<p className="text-muted-foreground">{displayDate}</p>
 			</div>
 
-			{data.games && data.games.length > 0 ? (
+			{data?.games && data.games.length > 0 ? (
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{data.games.map((game) => {
 						const gameStatus = getGameStateLabel(game.gameState);
-						const gameTime = formatGameTime(game.startTimeUTC);
 
 						return (
 							<MatchupCard
@@ -91,7 +151,7 @@ export default async function TodaySchedulePage() {
 								awayTeam={game.awayTeam}
 								homeTeam={game.homeTeam}
 								venue={game.venue.default}
-								gameTime={gameTime}
+								startTimeUTC={game.startTimeUTC}
 								status={gameStatus}
 							/>
 						);
