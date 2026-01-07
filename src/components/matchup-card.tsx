@@ -6,6 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { GameTime } from "@/components/game-time";
 
 interface Team {
 	abbrev: string;
@@ -20,7 +21,7 @@ interface MatchupCardProps {
 	awayTeam: Team;
 	homeTeam: Team;
 	venue: string;
-	gameTime: string;
+	startTimeUTC: string;
 	status: {
 		label: string;
 		variant: "default" | "secondary" | "destructive" | "outline";
@@ -31,9 +32,12 @@ export function MatchupCard({
 	awayTeam,
 	homeTeam,
 	venue,
-	gameTime,
+	startTimeUTC,
 	status,
 }: MatchupCardProps) {
+	// Only show relative time for scheduled games (not live or final)
+	const showRelative = status.label === "Scheduled";
+
 	return (
 		<Card className="w-full">
 			<CardHeader>
@@ -41,7 +45,9 @@ export function MatchupCard({
 					<CardTitle className="text-lg">{venue}</CardTitle>
 					<Badge variant={status.variant}>{status.label}</Badge>
 				</div>
-				<CardDescription>{gameTime}</CardDescription>
+				<CardDescription>
+					<GameTime startTimeUTC={startTimeUTC} showRelative={showRelative} />
+				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<div className="space-y-4">

@@ -50,15 +50,6 @@ function isValidDate(dateString: string): boolean {
 	return date instanceof Date && !isNaN(date.getTime());
 }
 
-function formatGameTime(startTimeUTC: string): string {
-	const date = new Date(startTimeUTC);
-	return date.toLocaleTimeString("en-US", {
-		hour: "numeric",
-		minute: "2-digit",
-		timeZoneName: "short",
-	});
-}
-
 function getGameStateLabel(
 	gameState: string
 ): {
@@ -116,7 +107,6 @@ export default async function ScheduleDatePage({ params }: PageProps) {
 				<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 					{data.games.map((game) => {
 						const gameStatus = getGameStateLabel(game.gameState);
-						const gameTime = formatGameTime(game.startTimeUTC);
 
 						return (
 							<MatchupCard
@@ -124,7 +114,7 @@ export default async function ScheduleDatePage({ params }: PageProps) {
 								awayTeam={game.awayTeam}
 								homeTeam={game.homeTeam}
 								venue={game.venue.default}
-								gameTime={gameTime}
+								startTimeUTC={game.startTimeUTC}
 								status={gameStatus}
 							/>
 						);
